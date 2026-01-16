@@ -4,6 +4,11 @@ use anyhow::{Context, Result};
 use clap::Parser;
 use cloudflare::{Cloudflare, RecordType};
 
+// ANSI color codes
+const COLOR_GREEN: &str = "\x1b[92m";
+const COLOR_BLUE: &str = "\x1b[94m";
+const COLOR_RESET: &str = "\x1b[0m";
+
 /// Cloudflare Dynamic DNS (CDDNS) - Updates your Cloudflare DNS records with your current IP
 #[derive(Parser, Debug)]
 #[command(name = "cddns")]
@@ -43,13 +48,13 @@ fn main() -> Result<()> {
         .context("Failed to get zone ID")?;
     
     if args.debug {
-        println!("\x1b[94mDebug\x1b[0m: Fetched zone token {}", zone_id);
+        println!("{}Debug{}: Fetched zone token {}", COLOR_BLUE, COLOR_RESET, zone_id);
     }
 
     // Get current IP
     let current_ip = get_ip(args.ipv6)?;
     if args.debug {
-        println!("\x1b[94mDebug\x1b[0m: Current IP address: {}", current_ip);
+        println!("{}Debug{}: Current IP address: {}", COLOR_BLUE, COLOR_RESET, current_ip);
     }
 
     // Get DNS record or create if it doesn't exist
@@ -57,8 +62,8 @@ fn main() -> Result<()> {
         Ok(record) => {
             if args.debug {
                 println!(
-                    "\x1b[94mDebug\x1b[0m: Fetched DNS record ({}/{})",
-                    record.name, record.content
+                    "{}Debug{}: Fetched DNS record ({}/{})",
+                    COLOR_BLUE, COLOR_RESET, record.name, record.content
                 );
             }
 
@@ -69,19 +74,19 @@ fn main() -> Result<()> {
 
             if args.debug {
                 println!(
-                    "\x1b[94mDebug\x1b[0m: Updated DNS record ({}/{})",
-                    result.name, result.content
+                    "{}Debug{}: Updated DNS record ({}/{})",
+                    COLOR_BLUE, COLOR_RESET, result.name, result.content
                 );
             }
 
             println!(
-                "\x1b[92mSuccess\x1b[0m: Your address {} has been changed to the IP {}",
-                result.name, result.content
+                "{}Success{}: Your address {} has been changed to the IP {}",
+                COLOR_GREEN, COLOR_RESET, result.name, result.content
             );
         }
         Err(_) => {
             if args.debug {
-                println!("\x1b[94mDebug\x1b[0m: No record was found. Creating a new one...");
+                println!("{}Debug{}: No record was found. Creating a new one...", COLOR_BLUE, COLOR_RESET);
             }
 
             let record_type = if args.ipv6 {
@@ -96,14 +101,14 @@ fn main() -> Result<()> {
 
             if args.debug {
                 println!(
-                    "\x1b[94mDebug\x1b[0m: Created new DNS record ({}/{})",
-                    result.name, result.content
+                    "{}Debug{}: Created new DNS record ({}/{})",
+                    COLOR_BLUE, COLOR_RESET, result.name, result.content
                 );
             }
 
             println!(
-                "\x1b[92mSuccess\x1b[0m: Your address {} has been changed to the IP {}",
-                result.name, result.content
+                "{}Success{}: Your address {} has been changed to the IP {}",
+                COLOR_GREEN, COLOR_RESET, result.name, result.content
             );
         }
     }

@@ -233,20 +233,7 @@ impl Cloudflare {
         let body = response.text().context("Failed to read response body")?;
 
         if !status.is_success() {
-            let mut error_msg = format!("HTTP error was received: {}", status);
-            
-            if status.as_u16() == 400 {
-                if let Ok(error_response) = serde_json::from_str::<ApiResponse<serde_json::Value>>(&body) {
-                    if let Some(error) = error_response.errors.first() {
-                        error_msg.push_str(&format!(
-                            "\nDetails ({}): {} (is your token correct?)",
-                            error.code, error.message
-                        ));
-                    }
-                }
-            }
-            
-            anyhow::bail!(error_msg);
+            anyhow::bail!(self.format_error_message("HTTP error was received", status, &body));
         }
 
         Ok(body)
@@ -266,20 +253,7 @@ impl Cloudflare {
         let body = response.text().context("Failed to read response body")?;
 
         if !status.is_success() {
-            let mut error_msg = format!("HTTP error was received sending the payload: {}", status);
-            
-            if status.as_u16() == 400 {
-                if let Ok(error_response) = serde_json::from_str::<ApiResponse<serde_json::Value>>(&body) {
-                    if let Some(error) = error_response.errors.first() {
-                        error_msg.push_str(&format!(
-                            "\nDetails ({}): {}",
-                            error.code, error.message
-                        ));
-                    }
-                }
-            }
-            
-            anyhow::bail!(error_msg);
+            anyhow::bail!(self.format_error_message("HTTP error was received sending the payload", status, &body));
         }
 
         Ok(body)
@@ -299,22 +273,32 @@ impl Cloudflare {
         let body = response.text().context("Failed to read response body")?;
 
         if !status.is_success() {
-            let mut error_msg = format!("HTTP error was received sending the payload: {}", status);
-            
-            if status.as_u16() == 400 {
-                if let Ok(error_response) = serde_json::from_str::<ApiResponse<serde_json::Value>>(&body) {
-                    if let Some(error) = error_response.errors.first() {
-                        error_msg.push_str(&format!(
-                            "\nDetails ({}): {}",
-                            error.code, error.message
-                        ));
-                    }
-                }
-            }
-            
-            anyhow::bail!(error_msg);
+            anyhow::bail!(self.format_error_message("HTTP error was received sending the payload", status, &body));
         }
 
         Ok(body)
+    }
+
+    fn format_error_message(&self, base_msg: &str, status: reqwest::StatusCode, body: &str) -> String {
+        let mut error_msg = format!("{}: {}", base_msg, status);
+        
+        if status.as_u16() == 400 {
+            if let Ok(error_response) = serde_json::from_str::<ApiResponse<serde_json::Value>>(body) {
+                if let Some(error) = error_response.errors.first() {
+                    error_msg.push_str(&format!(
+                        "\nDetails ({}): {}{}",
+                        error.code,
+                        error.message,
+                        if base_msg.contains("HTTP error was received:") {
+                            " (is your token correct?)"
+                        } else {
+                            ""
+                        }
+                    ));
+                }
+            }
+        }
+        
+        error_msg
     }
 }
