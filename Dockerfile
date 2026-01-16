@@ -12,14 +12,9 @@ RUN cargo build --release && \
     strip target/release/cddns
 
 # Runtime stage
-FROM debian:bookworm-slim
+FROM gcr.io/distroless/cc-debian13:nonroot
 
-# Install CA certificates for HTTPS
-RUN apt-get update && \
-    apt-get install -y ca-certificates && \
-    rm -rf /var/lib/apt/lists/*
+COPY --from=builder /build/target/release/cddns /usr/local/bin/cddns
 
-# Copy the binary from the builder
-COPY --from=builder /build/target/release/cddns /bin/cddns
-
-ENTRYPOINT [ "cddns" ]
+USER nonroot:nonroot
+ENTRYPOINT ["/usr/local/bin/cddns"]
