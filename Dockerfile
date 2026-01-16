@@ -1,29 +1,23 @@
 # Build stage
-FROM rust:1.83-alpine AS builder
+FROM rust:1.83 AS builder
 
 WORKDIR /build
 
-# Install build dependencies
-RUN apk add --no-cache musl-dev
-
-# Copy manifests
+# Copy all source code
 COPY Cargo.toml .
-
-# Create a dummy main.rs to build dependencies
-RUN mkdir src && \
-    echo "fn main() {}" > src/main.rs && \
-    cargo build --release && \
-    rm -rf src
-
-# Copy source code
 COPY src src
 
 # Build the application
-RUN touch src/main.rs && \
-    cargo build --release
+RUN cargo build --release && \
+    strip target/release/cddns
 
 # Runtime stage
-FROM alpine:latest
+FROM debian:bookworm-slim
+
+# Install CA certificates for HTTPS
+RUN apt-get update && \
+    apt-get install -y ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
 
 # Copy the binary from the builder
 COPY --from=builder /build/target/release/cddns /bin/cddns

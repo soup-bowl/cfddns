@@ -3,21 +3,12 @@ FROM rust:1.83 AS builder
 
 WORKDIR /build
 
-# Copy manifests
+# Copy all source code
 COPY Cargo.toml .
-
-# Create a dummy main.rs to build dependencies
-RUN mkdir src && \
-    echo "fn main() {}" > src/main.rs && \
-    cargo build --release && \
-    rm -rf src
-
-# Copy source code
 COPY src src
 
 # Build the application
-RUN touch src/main.rs && \
-    cargo build --release
+RUN cargo build --release
 
 # Runtime stage
 FROM debian:bookworm-slim
