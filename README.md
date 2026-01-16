@@ -1,7 +1,7 @@
-# Cloudflare Dynamic DNS (CDDNS)
+# Cloudflare Dynamic DNS (CFDDNS)
 
 [![](https://img.shields.io/docker/pulls/soupbowl/cf-dynamicdns?logo=docker&logoColor=white)](https://hub.docker.com/r/soupbowl/cf-dynamicdns)
-[![CodeFactor](https://www.codefactor.io/repository/github/soup-bowl/cloudflare-dynamicdns/badge)](https://www.codefactor.io/repository/github/soup-bowl/cloudflare-dynamicdns)
+[![CodeFactor](https://www.codefactor.io/repository/github/soup-bowl/cfddns/badge)](https://www.codefactor.io/repository/github/soup-bowl/cfddns)
 [![Build Container](https://github.com/soup-bowl/cloudflare-dynamicdns/actions/workflows/build.yml/badge.svg)](https://github.com/soup-bowl/cloudflare-dynamicdns/actions/workflows/build.yml)
 
 With a specified Cloudflare DNS API token and a subdomain, this tool will detect your current IP address (using
