@@ -6,8 +6,8 @@ on:
     - main
     paths:
     - "Dockerfile"
-    - "run.py"
-    - "cddns/**"
+    - "src/**"
+    - "Cargo.toml"
     - ".github/workflows/build.yml"
   release:
     types:

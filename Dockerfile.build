@@ -1,19 +1,28 @@
-FROM python:3 as build
+# Build stage
+FROM rust:1.83 AS builder
 
-WORKDIR /app
+WORKDIR /build
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt && \
-	pip install --no-cache-dir pyinstaller
+# Copy manifests
+COPY Cargo.toml .
 
-COPY cddns cddns
-COPY run.py .
+# Create a dummy main.rs to build dependencies
+RUN mkdir src && \
+    echo "fn main() {}" > src/main.rs && \
+    cargo build --release && \
+    rm -rf src
 
-RUN pyinstaller -F -n cddns run.py
+# Copy source code
+COPY src src
 
+# Build the application
+RUN touch src/main.rs && \
+    cargo build --release
 
+# Runtime stage
 FROM debian:bookworm-slim
 
-COPY --from=build /app/dist/cddns /bin/cddns
+# Copy the binary from the builder
+COPY --from=builder /build/target/release/cddns /bin/cddns
 
 ENTRYPOINT [ "cddns" ]

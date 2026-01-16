@@ -1,11 +1,31 @@
-FROM python:3-alpine
+# Build stage
+FROM rust:1.83-alpine AS builder
 
-WORKDIR /opt/app
+WORKDIR /build
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Install build dependencies
+RUN apk add --no-cache musl-dev
 
-COPY cddns cddns
-COPY run.py .
+# Copy manifests
+COPY Cargo.toml .
 
-ENTRYPOINT [ "python", "run.py" ]
+# Create a dummy main.rs to build dependencies
+RUN mkdir src && \
+    echo "fn main() {}" > src/main.rs && \
+    cargo build --release && \
+    rm -rf src
+
+# Copy source code
+COPY src src
+
+# Build the application
+RUN touch src/main.rs && \
+    cargo build --release
+
+# Runtime stage
+FROM alpine:latest
+
+# Copy the binary from the builder
+COPY --from=builder /build/target/release/cddns /bin/cddns
+
+ENTRYPOINT [ "cddns" ]

@@ -1,0 +1,21 @@
+[package]
+name = "cddns"
+version = "0.3.0"
+edition = "2021"
+authors = ["soup-bowl <code@soupbowl.io>"]
+description = "Cloudflare Dynamic DNS updater"
+license = "MIT"
+
+[dependencies]
+reqwest = { version = "0.12", default-features = false, features = ["blocking", "rustls-tls", "json"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+clap = { version = "4.5", features = ["derive", "env"] }
+anyhow = "1.0"
+chrono = "0.4"
+
+[profile.release]
+strip = true
+lto = true
+codegen-units = 1
+opt-level = "z"
