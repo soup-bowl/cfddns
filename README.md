@@ -51,7 +51,7 @@ services:
 
 ### Executable
 
-There are executables on the [Releases page](https://github.com/soup-bowl/cloudflare-dynamicdns/releases/latest). These should work *without* Python being installed.
+There are executables on the [Releases page](https://github.com/soup-bowl/cloudflare-dynamicdns/releases/latest). These are compiled as single-binary executables for multiple architectures (AMD64, ARM64).
 
 Below is a one-liner script to download and install to the binary path on Linux (requires sudo).
 
@@ -64,29 +64,27 @@ wget -O /tmp/cddns.zip "https://github.com/soup-bowl/cloudflare-dynamicdns/relea
   && sudo mv /tmp/cddns /bin/
 ```
 
-Verify by running `cddns -v`.
+Verify by running `cddns --version`.
 
 ### Native
 
+This is a Rust application that compiles to a single static binary with minimal dependencies.
+
+To build from source:
+
 ```bash
-python3 run.py --domain <your Dynamic DNS domain> --token <Your CF API Token>
+cargo build --release
+```
+
+The binary will be located at `target/release/cddns`.
+
+To run:
+
+```bash
+./target/release/cddns --domain <your Dynamic DNS domain> --token <Your CF API Token>
 ```
 
 (Arguments can be omitted if you have the values in your environment).
-
-This Python script depends on **Python3** using the **requests** library, which can be installed in the following manners:
-
-Via pip (universal):
-
-```bash
-pip install requests
-```
-
-Via apt-get (Debian-based):
-
-```bash
-sudo apt-get install python3-requests
-```
 
 ## Getting your Cloudflare Token
 

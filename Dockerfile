@@ -1,11 +1,25 @@
-FROM python:3-alpine
+# Build stage
+FROM rust:1.83 AS builder
 
-WORKDIR /opt/app
+WORKDIR /build
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy all source code
+COPY Cargo.toml .
+COPY src src
 
-COPY cddns cddns
-COPY run.py .
+# Build the application
+RUN cargo build --release && \
+    strip target/release/cddns
 
-ENTRYPOINT [ "python", "run.py" ]
+# Runtime stage
+FROM debian:bookworm-slim
+
+# Install CA certificates for HTTPS
+RUN apt-get update && \
+    apt-get install -y ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy the binary from the builder
+COPY --from=builder /build/target/release/cddns /bin/cddns
+
+ENTRYPOINT [ "cddns" ]
